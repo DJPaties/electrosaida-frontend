@@ -1,103 +1,234 @@
+"use client";
+
+import FeaturedCategoryCard from "@/components/FeaturedCategoryCard";
+import ProductCard from "@/components/ProductCard";
 import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+
+const images = [
+  "/assets/banner/banner1.webp",
+  "/assets/banner/banner2.webp",
+  "/assets/banner/banner3.webp",
+];
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [current, setCurrent] = useState(0);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleDotClick = (index: number) => setCurrent(index);
+
+  const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+    const clientX = "touches" in e ? e.touches[0].clientX : (e as any).clientX;
+    touchStartX.current = clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent | React.MouseEvent) => {
+    const clientX = "changedTouches" in e ? e.changedTouches[0].clientX : (e as any).clientX;
+    touchEndX.current = clientX;
+    const diff = touchStartX.current - touchEndX.current;
+    if (diff > 50) setCurrent((prev) => (prev + 1) % images.length);
+    else if (diff < -50) setCurrent((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const slideContent = [
+    {
+      title: "Ready to start your project!",
+      subtitle: "",
+      button: { text: "Shop Now", href: "/products" },
+    },
+    {
+      title: "You want it now? We deliver!",
+      subtitle: "Special Offer: Delivery to LIU – Saida University is FREE!",
+      button: null,
+    },
+    {
+      title: "Browse Our Featured Categories!",
+      subtitle: "",
+      button: { text: "Explore", href: "/categories" },
+    },
+  ];
+
+  return (
+    <main className="w-full pt-6 pb-10">
+      {/* 🌄 Carousel */}
+      <div
+        className="relative w-full h-[500px] overflow-hidden"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleTouchStart}
+        onMouseUp={handleTouchEnd}
+      >
+        {images.map((src, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === current ? "opacity-100 z-10" : "opacity-0 z-0"
+              }`}
           >
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+              src={src}
+              alt={`Banner ${index + 1}`}
+              fill
+              className="object-cover"
+              priority={index === 0}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <div className="absolute inset-0 flex flex-col justify-center items-start px-10 text-black bg-black/10">
+              <h2 className="text-4xl font-bold drop-shadow-lg max-w-[600px]">
+                {slideContent[index].title}
+              </h2>
+              {slideContent[index].subtitle && (
+                <p className="mt-2 text-lg font-medium drop-shadow-sm">
+                  {slideContent[index].subtitle}
+                </p>
+              )}
+              {slideContent[index].button && (
+                <Link
+                  href={slideContent[index].button.href}
+                  className="mt-4 inline-block px-6 py-2 bg-blue-600 text-white rounded-md text-lg font-semibold shadow hover:bg-yellow-400 hover:text-black transition-all duration-300 cursor-pointer"
+                >
+                  {slideContent[index].button.text}
+                </Link>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {/* Dots */}
+        <div className="absolute bottom-6 w-full flex justify-center items-center gap-3 z-20">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => handleDotClick(index)}
+              className={`transition-all duration-500 h-2 rounded-full ${current === index
+                ? "w-8 bg-blue-600"
+                : "w-2 bg-gray-400 hover:bg-blue-400"
+                } cursor-pointer`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+      </div>
+
+      {/* 🏷️ Label + Gap */}
+      <div className="my-10 px-4 justify-center text-center">
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">Arduino Essentials</h2>
+      </div>
+
+      {/* 🧩 Featured Section */}
+      {/* 🧩 Featured Section */}
+      {/* 🧩 Featured Section */}
+      <section className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-4 items-stretch">
+        {/* Left: Big Category Card */}
+        <div className="lg:col-span-2 flex justify-center items-center">
+          <FeaturedCategoryCard />
+        </div>
+
+        {/* Right: Product Grid */}
+        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <ProductCard
+            id="1"
+            name="Arduino Uno R3"
+            price={12.99}
+            image="/assets/products/Arduino-Uno-R3.jpg"
+            hoverImage="/assets/products/Arduino-Uno-R3-hover.jpg"
+            inStock={true}
+            description="Classic board for beginners and pros."
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+          <ProductCard
+            id="2"
+            name="Nano V3.0"
+            price={9.5}
+            image="/assets/products/arduino-nano-v3.0.webp"
+            hoverImage="/assets/products/arduino-nano-v3.0-hover.webp"
+            inStock={true}
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
+          <ProductCard
+            id="3"
+            name="Breadboard Power Supply"
+            price={3.2}
+            image="/assets/products/Arduino-Uno-R3.jpg"
+            hoverImage="/assets/products/Arduino-Uno-R3-hover.jpg"
+            inStock={false}
           />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <ProductCard
+            id="4"
+            name="Jumper Wires 40pcs"
+            price={1.5}
+            image="/assets/products/Male-Female_Wires.webp"
+            hoverImage="/assets/products/Male-Female-Wires-hover.webp"
+            inStock={true}
+          />
+        </div>
+      </section>
+
+
+
+      {/* 📦 See More Button */}
+      <div className="text-center mt-6">
+        <Link
+          href="/categories/arduino"
+          className="inline-block px-6 py-2 text-white bg-blue-600 hover:bg-yellow-400 hover:text-black transition rounded-lg shadow font-medium"
+        >
+          See More
+        </Link>
+      </div>
+
+      {/* 🚚 Special Offer Ticker */}
+      <div className="mt-12 overflow-hidden bg-blue-100 py-3">
+        <div className="animate-marquee whitespace-nowrap text-center text-blue-900 font-semibold text-lg">
+          <span className="inline-block mx-10">
+            🚚 Delivery in Saida Available!
+          </span>
+          <span className="inline-block mx-10">
+            🎓 Free Delivery To LIU – Saida University!
+          </span>
+          <span className="inline-block mx-10">
+            🚚 Delivery in Saida Available!
+          </span>
+          <span className="inline-block mx-10">
+            🎓 Free Delivery To LIU – Saida University!
+          </span>
+          <span className="inline-block mx-10">
+            🚚 Delivery in Saida Available!
+          </span>
+          <span className="inline-block mx-10">
+            🎓 Free Delivery To LIU – Saida University!
+          </span>
+          <span className="inline-block mx-10">
+            🚚 Delivery in Saida Available!
+          </span>
+          <span className="inline-block mx-10">
+            🎓 Free Delivery To LIU – Saida University!
+          </span>
+          <span className="inline-block mx-10">
+            🚚 Delivery in Saida Available!
+          </span>
+        </div>
+      </div>
+
+      {/* Animation Styles */}
+      <style jsx>{`
+        .animate-marquee {
+          animation: marquee 15s linear infinite;
+        }
+
+        @keyframes marquee {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+      `}</style>
+    </main>
   );
 }
