@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function FeaturedCategoryCard() {
   return (
-    <Link href="/categories/arduino" className="relative group overflow-hidden rounded-xl shadow-lg w-full h-80">
+    <Link href="/categories/arduino" className="relative group overflow-hidden rounded-xl shadow-lg w-full h-full">
       <Image
         src="/assets/category/ArduinoClose.webp" // Replace with your image path
         alt="Arduino Components"

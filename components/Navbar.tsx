@@ -26,9 +26,8 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`bg-gray-300 text-white px-6 py-4 flex items-center justify-between h-[100px] rounded-lg m-6 sticky top-0 z-50 transition-transform duration-300 ${
-        visible ? "translate-y-0" : "-translate-y-full"
-      }`}
+      className={`bg-gray-300 text-white px-4 py-3 flex flex-wrap sm:flex-nowrap items-center justify-between h-auto sm:h-[100px] rounded-lg sticky top-0 z-50 transition-transform duration-300 ${visible ? "translate-y-0" : "-translate-y-full"
+        }`}
     >
       {/* Logo */}
       <Link href="/" className="flex items-center gap-4 h-full">
@@ -43,7 +42,7 @@ export default function Navbar() {
               priority
             />
           </div>
-          <div className="flex items-center h-full w-2/4">
+          <div className="hidden md:flex items-center h-full w-2/4">
             <Image
               src="/assets/logos/slogan_no_white_edges.png"
               alt="ElectroSaida Slogan"
@@ -57,7 +56,7 @@ export default function Navbar() {
       </Link>
 
       {/* Search Bar */}
-      <div className="relative  w-100">
+      <div className="relative flex-1 max-w-xs sm:max-w-md lg:max-w-lg mx-4">
         <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
           <Search size={18} />
         </span>
