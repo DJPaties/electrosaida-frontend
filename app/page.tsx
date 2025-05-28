@@ -5,7 +5,7 @@ import ProductCard from "@/components/ProductCard";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-
+import ModelingShowcase from "@/components/ModelingShowcase";
 // Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, A11y } from "swiper/modules";
@@ -15,7 +15,7 @@ import "swiper/css/pagination";
 
 const images = [
   "/assets/banner/banner1.webp",
-  "/assets/banner/banner2.webp",
+  "/assets/banner/Banner2.webp",
   "/assets/banner/banner3.webp",
 ];
 
@@ -26,8 +26,8 @@ const slideContent = [
     button: { text: "Shop Now", href: "/products" },
   },
   {
-    title: "You want it now? We deliver!",
-    subtitle: "Special Offer: Delivery to LIU – Saida University is FREE!",
+    title: "Bring Your Ideas to Life!",
+    subtitle: "We can design and 3D print your custom parts.",
     button: null,
   },
   {
@@ -225,6 +225,7 @@ export default function Home() {
         </div>
       </section>
 
+
       {/* 📦 See More */}
       <div className="text-center mt-6">
         <Link
@@ -236,14 +237,70 @@ export default function Home() {
       </div>
 
       {/* 🚚 Ticker */}
-      <div className="mt-12 mb-12 overflow-hidden bg-blue-100 py-3">
-        <div className="animate-marquee whitespace-nowrap text-center text-blue-900 font-semibold text-lg">
-          <span className="inline-block mx-10">🚚 Delivery in Saida Available!</span>
-          <span className="inline-block mx-10">🎓 Free Delivery To LIU – Saida University!</span>
-          <span className="inline-block mx-10">🚚 Delivery in Saida Available!</span>
-          <span className="inline-block mx-10">🎓 Free Delivery To LIU – Saida University!</span>
+      <div className="mt-12 mb-12 overflow-hidden bg-blue-100 py-3 text-black">
+        <div className="marquee">
+          <div className="marquee-content whitespace-nowrap">
+            <span className="inline-block mx-10">🚚 Delivery in Saida Available!</span>
+            <span className="inline-block mx-10">🎓 Free Delivery To LIU – Saida University!</span>
+            <span className="inline-block mx-10">🚚 Delivery in Saida Available!</span>
+            <span className="inline-block mx-10">🎓 Free Delivery To LIU – Saida University!</span>
+          </div>
+          <div className="marquee-content whitespace-nowrap">
+            <span className="inline-block mx-10">🚚 Delivery in Saida Available!</span>
+            <span className="inline-block mx-10">🎓 Free Delivery To LIU – Saida University!</span>
+            <span className="inline-block mx-10">🚚 Delivery in Saida Available!</span>
+            <span className="inline-block mx-10">🎓 Free Delivery To LIU – Saida University!</span>
+          </div>
         </div>
       </div>
+
+      {/* 🧩 Featured Section */}
+      <section className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-4 items-stretch">
+
+        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <ProductCard
+            id="1"
+            name="Arduino Uno R3"
+            price={12.99}
+            image="/assets/products/Arduino-Uno-R3.jpg"
+            hoverImage="/assets/products/Arduino-Uno-R3-hover.jpg"
+            inStock={true}
+            description="Classic board for beginners and pros."
+          />
+          <ProductCard
+            id="2"
+            name="Nano V3.0"
+            price={9.5}
+            image="/assets/products/arduino-nano-v3.0.webp"
+            hoverImage="/assets/products/arduino-nano-v3.0-hover.webp"
+            inStock={true}
+          />
+          <ProductCard
+            id="3"
+            name="Breadboard Power Supply"
+            price={3.2}
+            image="/assets/products/Arduino-Uno-R3.jpg"
+            hoverImage="/assets/products/Arduino-Uno-R3-hover.jpg"
+            inStock={false}
+          />
+          <ProductCard
+            id="4"
+            name="Jumper Wires 40pcs"
+            price={1.5}
+            image="/assets/products/Male-Female_Wires.webp"
+            hoverImage="/assets/products/Male-Female-Wires-hover.webp"
+            inStock={true}
+          />
+        </div>
+        <div className="lg:col-span-2 flex justify-center items-center">
+          <FeaturedCategoryCard />
+        </div>
+      </section>
+
+      {/* 🎨 3D Modeling Showcase */}
+      <ModelingShowcase />
+
+
 
       {/* 🔻 Divider */}
       <div className="px-4 my-14">
@@ -335,20 +392,31 @@ export default function Home() {
 
       {/* 🎞 Animation Styles */}
       <style jsx>{`
-        .animate-marquee {
-          animation: marquee 15s linear infinite;
-        }
-    :global(.swiper-pagination) {
-      bottom: -5px !important;
+  .marquee {
+    display: flex;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .marquee-content {
+    display: flex;
+    animation: marquee 15s linear infinite;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0%);
     }
-        @keyframes marquee {
-          0% {
-            transform: translateX(100%);
-          100% {
-            transform: translateX(-100%);
-          }
-        }
-      `}</style>
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  :global(.swiper-pagination) {
+    bottom: -5px !important;
+  }
+`}</style>
+
     </main>
   );
 }

@@ -1,3 +1,4 @@
+// Updated ProductCard.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -5,6 +6,9 @@ import Image from "next/image";
 import { FiEye, FiShoppingCart } from "react-icons/fi";
 import ProductModal from "./ProductModal";
 import Link from "next/link";
+import { useCart } from "./CartContext";
+import { toast } from "react-hot-toast";
+
 
 interface ProductCardProps {
   id: string;
@@ -27,6 +31,13 @@ export default function ProductCard({
 }: ProductCardProps) {
   const [hovered, setHovered] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const { addToCart } = useCart();
+ const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart({ id, name, price, image, quantity: 1 });
+    toast.success("Added to cart!");
+  };
 
   return (
     <>
@@ -38,7 +49,6 @@ export default function ProductCard({
       >
         {/* Image */}
         <div className="relative w-full h-64 overflow-hidden">
-          {/* Main image */}
           <Image
             src={image}
             alt={name}
@@ -46,7 +56,6 @@ export default function ProductCard({
             sizes="small"
             className={`object-contain absolute transition-opacity duration-500 ease-in-out ${hovered ? "opacity-0" : "opacity-100"}`}
           />
-          {/* Hover image */}
           <Image
             src={hoverImage}
             alt={name}
@@ -57,8 +66,7 @@ export default function ProductCard({
 
           {/* Hover Buttons */}
           <div
-            className={`absolute top-2 right-2 flex flex-col gap-2 transition-opacity duration-300 ${hovered ? "opacity-100" : "opacity-0"
-              } hidden md:flex`}
+            className={`absolute top-2 right-2 flex flex-col gap-2 transition-opacity duration-300 ${hovered ? "opacity-100" : "opacity-0"} hidden md:flex`}
           >
             <button
               className="p-2 bg-gray-100 rounded-full shadow hover:bg-yellow-400 transition-colors"
@@ -70,13 +78,9 @@ export default function ProductCard({
             >
               <FiEye className="text-xl text-blue-600" />
             </button>
-            <button 
+            <button
               className="p-2 bg-gray-100 rounded-full shadow hover:bg-yellow-400 transition-colors"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                // Add to cart logic here
-              }}
+              onClick={handleAddToCart}
             >
               <FiShoppingCart className="text-xl text-blue-600" />
             </button>
@@ -86,14 +90,10 @@ export default function ProductCard({
         {/* Details */}
         <div className="flex items-center justify-center mt-2 gap-2 flex-wrap">
           <span className="text-blue-600 font-bold text-lg">${price.toFixed(2)}</span>
-          <span
-            className={`text-sm font-medium ${inStock ? "text-green-600" : "text-red-500"
-              }`}
-          >
+          <span className={`text-sm font-medium ${inStock ? "text-green-600" : "text-red-500"}`}>
             {inStock ? "In Stock" : "Out of Stock"}
           </span>
 
-          {/* Mobile buttons */}
           <div className="flex gap-2 ml-4 md:hidden">
             <button
               className="p-2 bg-gray-100 rounded-full shadow hover:bg-yellow-400 transition-colors"
@@ -105,13 +105,9 @@ export default function ProductCard({
             >
               <FiEye className="text-xl text-blue-600" />
             </button>
-            <button 
+            <button
               className="p-2 bg-gray-100 rounded-full shadow hover:bg-yellow-400 transition-colors"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                // Add to cart logic here
-              }}
+              onClick={handleAddToCart}
             >
               <FiShoppingCart className="text-xl text-blue-600" />
             </button>
@@ -119,7 +115,6 @@ export default function ProductCard({
         </div>
       </Link>
 
-      {/* Modal */}
       {modalOpen && (
         <ProductModal
           id={id}
