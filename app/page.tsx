@@ -338,7 +338,7 @@ export default function Home() {
         >
           {horizontalProducts.map((product) => (
             <SwiperSlide key={product.id}>
-              <div className="mx-auto max-w-[250px]">
+              <div className="mx-auto ">
                 <ProductCard {...product} />
               </div>
             </SwiperSlide>

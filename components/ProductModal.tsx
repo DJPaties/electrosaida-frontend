@@ -23,8 +23,14 @@ export default function ProductModal({
   onClose,
 }: ProductModalProps) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center p-4">
-      <div className="bg-white max-w-md w-full rounded-lg shadow-lg p-6 relative">
+    <div
+      className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center p-4"
+      onClick={onClose} // Handle click on background
+    >
+      <div
+        className="bg-white max-w-md w-full rounded-lg shadow-lg p-6 relative"
+        onClick={(e) => e.stopPropagation()} // Prevent click inside modal from closing
+      >
         <button
           className="absolute top-4 right-4 text-gray-600 hover:text-red-500"
           onClick={onClose}
@@ -42,9 +48,13 @@ export default function ProductModal({
             />
           </div>
           <h2 className="text-2xl font-bold text-gray-800">{name}</h2>
-          <p className="mt-2 text-gray-600 text-sm">{description || "No description available."}</p>
+          <p className="mt-2 text-gray-600 text-sm">
+            {description || "No description available."}
+          </p>
           <div className="mt-4 flex items-center gap-4">
-            <span className="text-lg font-semibold text-blue-600">${price.toFixed(2)}</span>
+            <span className="text-lg font-semibold text-blue-600">
+              ${price.toFixed(2)}
+            </span>
             <span
               className={`text-sm font-medium ${
                 inStock ? "text-green-600" : "text-red-500"
