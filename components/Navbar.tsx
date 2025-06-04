@@ -3,13 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
-import { Search } from "lucide-react"; // You can replace with any icon library
-import CartModal from "./CartModal"; // Adjust path if needed
-import { useCart } from "./CartContext"; // Adjust the path if needed
+import { Search, User } from "lucide-react";
+import CartModal from "./CartModal";
+import { useCart } from "./CartContext";
 
 export default function Navbar() {
   const [visible, setVisible] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const lastScrollY = useRef(0);
   const { items } = useCart();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -31,12 +32,12 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const isLoggedIn = false; // Replace with actual auth check
+
   return (
     <>
-
       <nav
-        className={`bg-gray-300 text-white px-4 py-3 flex flex-wrap sm:flex-nowrap items-center justify-between h-auto sm:h-[100px] rounded-lg sticky top-0 z-50 transition-transform duration-300 ${visible ? "translate-y-0" : "-translate-y-full"
-          }`}
+        className={`bg-gray-300 text-white px-4 py-3 flex flex-wrap sm:flex-nowrap items-center justify-between h-auto sm:h-[100px] rounded-lg sticky top-0 z-50 transition-transform duration-300 ${visible ? "translate-y-0" : "-translate-y-full"}`}
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-4 h-full">
@@ -76,16 +77,62 @@ export default function Navbar() {
           />
         </div>
 
-        {/* Cart */}
-        <div className="relative ml-12 md:mr-12 sm:mr-4">
-          <button onClick={toggleCart} className="text-xl">
-            🛒
-          </button>
-          {totalItems > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5">
-              {totalItems}
-            </span>
-          )}
+        {/* Right Icons */}
+        <div className="flex items-center gap-6 relative">
+          {/* User Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowUserDropdown((prev) => !prev)}
+              className="text-black hover:text-yellow-600 transition"
+            >
+              <User size={24} />
+            </button>
+            {showUserDropdown && (
+              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 shadow-md rounded-md py-2 z-50">
+                {!isLoggedIn ? (
+                  <Link
+                    href="/login"
+                    className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                  >
+                    Log in
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href="/profile"
+                      className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      href="/orders"
+                      className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                    >
+                      Orders
+                    </Link>
+                    <button
+                      onClick={() => alert("Logging out...")}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    >
+                      Log out
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Cart */}
+          <div className="relative">
+            <button onClick={toggleCart} className="text-xl">
+              🛒
+            </button>
+            {totalItems > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5">
+                {totalItems}
+              </span>
+            )}
+          </div>
         </div>
       </nav>
       <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />

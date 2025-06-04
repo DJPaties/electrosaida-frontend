@@ -3,6 +3,9 @@
 import React, { useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import Slider from "rc-slider";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+
 import "rc-slider/assets/index.css";
 
 const mockProducts = [
@@ -63,10 +66,18 @@ const sortOptions = ["Default", "Price: Low to High", "Price: High to Low", "Nam
 
 export default function ProductPage() {
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
   const [stockFilter, setStockFilter] = useState(false);
   const [sortOption, setSortOption] = useState("Default");
   const [priceRange, setPriceRange] = useState([0, 20]);
+  const searchParams = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get("category");
+    if (categoryFromUrl && categories.includes(categoryFromUrl)) {
+      setSelectedCategory(categoryFromUrl);
+    }
+  }, [searchParams]);
 
   let filteredProducts = mockProducts.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());

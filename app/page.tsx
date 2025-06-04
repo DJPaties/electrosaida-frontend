@@ -36,7 +36,12 @@ const slideContent = [
     button: { text: "Explore", href: "/categories" },
   },
 ];
-
+const homepageCategories = [
+  "All",
+  "Microcontrollers",
+  "Sensors",
+  "Modules"
+];
 export default function Home() {
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef(0);
@@ -101,21 +106,13 @@ export default function Home() {
 
   return (
     <main className="w-full pt-6">
-      {/* 📂 Categories Section */}
+       {/* 📂 Categories Section */}
       <section className="px-4 mb-6">
         <div className="flex gap-4 overflow-x-auto pb-2 justify-center items-center">
-          {[
-            "Sensors",
-            "Displays",
-            "Arduino Boards",
-            "Wires & Connectors",
-            "Passive Components",
-          ].map((category) => (
+          {homepageCategories.map((category) => (
             <Link
               key={category}
-              href={`/categories/${encodeURIComponent(
-                category.toLowerCase().replace(/ /g, "-")
-              )}`}
+              href={`/products?category=${encodeURIComponent(category)}`}
               className="flex-shrink-0 px-4 py-2 bg-blue-100 text-blue-800 rounded-full hover:bg-yellow-300 transition whitespace-nowrap"
             >
               {category}
