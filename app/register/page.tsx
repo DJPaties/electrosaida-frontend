@@ -16,7 +16,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-yellow-100 to-blue-100">
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-yellow-100 to-blue-100 text-black">
       <form onSubmit={handleRegister} className="bg-white p-8 rounded shadow-md w-full max-w-sm">
         <h2 className="text-2xl font-bold text-center mb-6 text-yellow-600">Register</h2>
 

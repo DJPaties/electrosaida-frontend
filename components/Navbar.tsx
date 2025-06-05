@@ -6,14 +6,21 @@ import React, { useState, useEffect, useRef } from "react";
 import { Search, User } from "lucide-react";
 import CartModal from "./CartModal";
 import { useCart } from "./CartContext";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [visible, setVisible] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [dropdownFixed, setDropdownFixed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<HTMLButtonElement>(null);
   const lastScrollY = useRef(0);
+  const pathname = usePathname();
   const { items } = useCart();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const isLoggedIn = true; // Replace later with real auth
 
   const toggleCart = () => setIsCartOpen((prev) => !prev);
 
@@ -28,16 +35,38 @@ export default function Navbar() {
       lastScrollY.current = currentScrollY;
     };
 
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        iconRef.current &&
+        !iconRef.current.contains(e.target as Node)
+      ) {
+        setShowUserDropdown(false);
+        setDropdownFixed(false);
+      }
+    };
+
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
-  const isLoggedIn = false; // Replace with actual auth check
+  // Close dropdown when route changes (e.g. clicking a link)
+  useEffect(() => {
+    setShowUserDropdown(false);
+    setDropdownFixed(false);
+  }, [pathname]);
 
   return (
     <>
       <nav
-        className={`bg-gray-300 text-white px-4 py-3 flex flex-wrap sm:flex-nowrap items-center justify-between h-auto sm:h-[100px] rounded-lg sticky top-0 z-50 transition-transform duration-300 ${visible ? "translate-y-0" : "-translate-y-full"}`}
+        className={`bg-gray-300 text-white px-4 py-3 flex flex-wrap sm:flex-nowrap items-center justify-between h-auto sm:h-[100px] rounded-lg sticky top-0 z-50 transition-transform duration-300 ${
+          visible ? "translate-y-0" : "-translate-y-full"
+        }`}
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-4 h-full">
@@ -80,15 +109,27 @@ export default function Navbar() {
         {/* Right Icons */}
         <div className="flex items-center gap-6 relative">
           {/* User Dropdown */}
-          <div className="relative">
+          <div
+            className="relative"
+            onMouseEnter={() => !dropdownFixed && setShowUserDropdown(true)}
+            onMouseLeave={() => !dropdownFixed && setShowUserDropdown(false)}
+          >
             <button
-              onClick={() => setShowUserDropdown((prev) => !prev)}
+              ref={iconRef}
+              onClick={() => {
+                setDropdownFixed((prev) => !prev);
+                setShowUserDropdown(true);
+              }}
               className="text-black hover:text-yellow-600 transition"
             >
               <User size={24} />
             </button>
+
             {showUserDropdown && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 shadow-md rounded-md py-2 z-50">
+              <div
+                ref={dropdownRef}
+                className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 shadow-md rounded-md py-2 z-50"
+              >
                 {!isLoggedIn ? (
                   <Link
                     href="/login"
@@ -111,7 +152,11 @@ export default function Navbar() {
                       Orders
                     </Link>
                     <button
-                      onClick={() => alert("Logging out...")}
+                      onClick={() => {
+                        alert("Logging out...");
+                        setDropdownFixed(false);
+                        setShowUserDropdown(false);
+                      }}
                       className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                     >
                       Log out
@@ -135,6 +180,7 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
+
       <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );

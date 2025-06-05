@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import { AuthProvider } from "./AuthContext";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -10,9 +11,13 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
   return (
     <>
+    <AuthProvider>
+
       {!isAuthPage && <Navbar />}
       <main>{children}</main>
       {!isAuthPage && <Footer />}
+</AuthProvider>
+
     </>
   );
 }

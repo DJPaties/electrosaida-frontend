@@ -1,28 +1,38 @@
 // app/login/page.tsx
 "use client";
 
+import { useAuth } from "@/components/AuthContext";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
+    const { login } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Logging in with:", email, password);
-    // Handle auth logic here
+    const success = login(email, password);
+    if (success) {
+      toast.success("Logged in!");
+      router.push("/"); // redirect
+    } else {
+      toast.error("Invalid credentials");
+    }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-100 to-yellow-100">
-      <form onSubmit={handleLogin} className="bg-white p-8 rounded shadow-md w-full max-w-sm">
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-100 to-yellow-100 text-black">
+      <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-sm">
         <h2 className="text-2xl font-bold text-center mb-6 text-blue-800">Login</h2>
 
         <input
           type="email"
           placeholder="Email"
-          className="w-full px-4 py-2 mb-4 border border-gray-300 rounded"
+          className="w-full px-4 py-2 mb-4 border border-gray-300 rounded "
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
