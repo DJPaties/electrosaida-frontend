@@ -26,7 +26,7 @@ export default function AboutUs() {
   </div>
   <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
     At <span className="font-semibold text-blue-700">ElectroSaida</span>,
-    we're on a mission to build the future—one chip at a time. Based in
+    We&rsquo;re on a mission to build the future—one chip at a time. Based in
     the heart of Saida, Lebanon, we are your go-to destination for
     high-quality electronics components, development boards, and
     educational kits. We proudly support students, makers, engineers, and
