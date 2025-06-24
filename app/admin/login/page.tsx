@@ -30,7 +30,8 @@ const AdminLogin: React.FC = () => {
       }
 
       const data = await res.json();
-      localStorage.setItem('adminToken', data.token);
+      console.log('Login successful:', data);
+      localStorage.setItem('adminToken', data.access_token);
 
       router.push('/admin/dashboard');
     } catch (err: any) {
