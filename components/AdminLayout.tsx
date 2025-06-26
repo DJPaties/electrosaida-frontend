@@ -16,6 +16,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <Link href="/admin/dashboard/products">Products</Link>
             <Link href="/admin/dashboard/orders">Orders</Link>
             <Link href="/admin/dashboard/users">Users</Link>
+            <Link href="/admin/dashboard/categories">Categories</Link>
           </nav>
         </div>
 

@@ -60,6 +60,7 @@ const Dashboard: React.FC = () => {
             const data = await res.json();
             return data;
           } catch (err) {
+            console.error(`Error fetching ${key}:`, err);
             setErrors(prev => ({ ...prev, [key]: (err as Error).message }));
             return [];
           }
