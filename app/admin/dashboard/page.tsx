@@ -44,7 +44,10 @@ const Dashboard: React.FC = () => {
           },
         });
 
-        if (!verifyRes.ok) throw new Error('Failed to verify admin');
+        if (!verifyRes.ok) {
+          router.push('/admin/login');
+          return;
+        };
 
         const payload = await verifyRes.json();
         if (payload.role !== 'admin') throw new Error('Access denied: Not an admin');
