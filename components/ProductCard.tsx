@@ -7,37 +7,45 @@ import ProductModal from "./ProductModal";
 import Link from "next/link";
 import { useCart } from "./CartContext";
 import { toast } from "react-hot-toast";
-
+import { Product } from "@/types/interfaces"; // Adjust the import path as necessary
+// interface ProductCardProps {
+//   id: string;
+//   name: string;
+//   price: number;
+//   image: string;
+//   hoverImage: string;
+//   inStock: boolean;
+//   description?: string;
+//   stock?: number
+// }
 interface ProductCardProps {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  hoverImage: string;
-  inStock: boolean;
-  description?: string;
+  product: Product;
 }
-
 export default function ProductCard({
-  id,
-  name,
-  price,
-  image,
-  hoverImage,
-  inStock,
-  description,
+product
 }: ProductCardProps) {
+  const {
+    id,
+    name,
+    price,
+    image,
+    hoverImage,
+    inStock,
+    description,
+    category,
+  } = product;
+
   const [hovered, setHovered] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const { addToCart } = useCart();
-
+  const API = process.env.NEXT_PUBLIC_API_URL ;
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart({ id, name, price, image, quantity: 1 });
     toast.success("Added to cart!");
   };
-
+console.log("ProductCard", product);
   return (
     <>
       <Link
@@ -50,14 +58,14 @@ export default function ProductCard({
   <div className="relative w-full h-64 overflow-hidden">
     {/* Product Images */}
     <Image
-      src={image}
+      src={`${API}/uploads/products/${image}`}
       alt={name}
       fill
       sizes="small"
       className={`object-contain absolute transition-opacity duration-500 ease-in-out ${hovered ? "opacity-0" : "opacity-100"}`}
     />
     <Image
-      src={hoverImage}
+      src={`${API}/uploads/products/${hoverImage}`}
       alt={name}
       fill
       sizes="small"
@@ -107,7 +115,7 @@ export default function ProductCard({
           image={image}
           description={description}
           price={price}
-          inStock={inStock}
+          inStock={!!inStock}
           onClose={() => setModalOpen(false)}
         />
       )}

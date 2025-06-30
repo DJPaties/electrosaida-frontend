@@ -2,8 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Category } from "@/types/interfaces";
+
+interface FeaturedCategoryCardProps {
+  category: Category;
+}
 
 export default function FeaturedCategoryCard() {
+  // You can use the category prop to dynamically set the image and text
+
   return (
     <Link href="/categories/arduino" className="relative group overflow-hidden rounded-xl shadow-lg w-full h-full">
       <Image

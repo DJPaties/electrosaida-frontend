@@ -9,6 +9,7 @@ import ModelingShowcase from "@/components/ModelingShowcase";
 // Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, A11y } from "swiper/modules";
+import { Product } from "@/types/interfaces";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -36,16 +37,42 @@ const slideContent = [
     button: { text: "Explore", href: "/categories" },
   },
 ];
-const homepageCategories = [
-  "All",
-  "Microcontrollers",
-  "Sensors",
-  "Modules"
-];
+
 export default function Home() {
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+  const API = process.env.NEXT_PUBLIC_API_URL;
+  // Define categories for the homepage from api 
+  const [homepageCategories, setHomepageCategories] = useState<string[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  useEffect(() => {
+    const fetchCategoriesAndProducts = async () => {
+      try {
+        const [catRes, prodRes] = await Promise.all([
+          fetch(`${API}/category`),
+          fetch(`${API}/product`)
+        ]);
+
+        const categories = await catRes.json();
+        const products = await prodRes.json();
+
+        if (Array.isArray(categories)) {
+          setHomepageCategories(categories.map((cat) => cat.title));
+        }
+
+        if (Array.isArray(products)) {
+          setProducts(products);
+        }
+
+      } catch (err) {
+        console.error("❌ Failed to fetch data", err);
+      }
+    };
+
+    fetchCategoriesAndProducts();
+  }, [API]);
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -106,7 +133,7 @@ export default function Home() {
 
   return (
     <main className="w-full pt-6">
-       {/* 📂 Categories Section */}
+      {/* 📂 Categories Section */}
       <section className="px-4 mb-6">
         <div className="flex gap-4 overflow-x-auto pb-2 justify-center items-center">
           {homepageCategories.map((category) => (
@@ -186,7 +213,18 @@ export default function Home() {
           <FeaturedCategoryCard />
         </div>
         <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <ProductCard
+          {/* Populate the 4 random products from same category */}
+          {products.slice(0, 4).map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+            />
+          ))}
+
+          {/* Uncomment below to use static products for testing */}
+          {/* Uncomment below to use static products for testing */}
+
+          {/* <ProductCard
             id="1"
             name="Arduino Uno R3"
             price={12.99}
@@ -218,7 +256,7 @@ export default function Home() {
             image="/assets/products/Male-Female_Wires.webp"
             hoverImage="/assets/products/Male-Female-Wires-hover.webp"
             inStock={true}
-          />
+          /> */}
         </div>
       </section>
 
@@ -255,7 +293,7 @@ export default function Home() {
       <section className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-4 items-stretch">
 
         <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <ProductCard
+          {/* <ProductCard
             id="1"
             name="Arduino Uno R3"
             price={12.99}
@@ -287,7 +325,7 @@ export default function Home() {
             image="/assets/products/Male-Female_Wires.webp"
             hoverImage="/assets/products/Male-Female-Wires-hover.webp"
             inStock={true}
-          />
+          /> */}
         </div>
         <div className="lg:col-span-2 flex justify-center items-center">
           <FeaturedCategoryCard />
@@ -333,10 +371,10 @@ export default function Home() {
           }}
           className="mx-auto"
         >
-          {horizontalProducts.map((product) => (
+          {products.slice(0,8).map((product) => (
             <SwiperSlide key={product.id}>
               <div className="mx-auto ">
-                <ProductCard {...product} />
+                <ProductCard product={product} />
               </div>
             </SwiperSlide>
           ))}
