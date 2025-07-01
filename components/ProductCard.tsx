@@ -45,7 +45,7 @@ product
     addToCart({ id, name, price, image, quantity: 1 });
     toast.success("Added to cart!");
   };
-console.log("ProductCard", product);
+// console.log("ProductCard", product);
   return (
     <>
       <Link

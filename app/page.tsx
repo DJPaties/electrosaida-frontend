@@ -9,7 +9,7 @@ import ModelingShowcase from "@/components/ModelingShowcase";
 // Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, A11y } from "swiper/modules";
-import { Product } from "@/types/interfaces";
+import { Product, Category } from "@/types/interfaces";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -34,18 +34,24 @@ const slideContent = [
   {
     title: "Browse Our Featured Categories!",
     subtitle: "",
-    button: { text: "Explore", href: "/categories" },
+    button: { text: "Explore", href: "/products" },
   },
 ];
 
 export default function Home() {
   const [current, setCurrent] = useState(0);
+  const [featuredCategory1, setFeaturedCategory1] = useState<Category | null>(null);
+  const [featuredCategory2, setFeaturedCategory2] = useState<Category | null>(null);
+  const [featuredProducts1, setFeaturedProducts1] = useState<Product[]>([]);
+  const [featuredProducts2, setFeaturedProducts2] = useState<Product[]>([]);
+  const [featuredSwiperProducts, setFeaturedSwiperProducts] = useState<Product[]>([]);
+
+
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
   const API = process.env.NEXT_PUBLIC_API_URL;
   // Define categories for the homepage from api 
-  const [homepageCategories, setHomepageCategories] = useState<string[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [homepageCategories, setHomepageCategories] = useState<Category[]>([]);
   useEffect(() => {
     const fetchCategoriesAndProducts = async () => {
       try {
@@ -58,11 +64,28 @@ export default function Home() {
         const products = await prodRes.json();
 
         if (Array.isArray(categories)) {
-          setHomepageCategories(categories.map((cat) => cat.title));
+          setHomepageCategories(categories);
+
+          if (categories.length >= 2) {
+            // 🔹 Pick 2 distinct random categories
+            const shuffled = [...categories].sort(() => 0.5 - Math.random());
+            const cat1 = shuffled[0];
+            const cat2 = shuffled.find((c) => c.id !== cat1.id) || null;
+
+            setFeaturedCategory1(cat1);
+            setFeaturedCategory2(cat2);
+
+            const productsCat1 = products.filter((p: Product) => p.categoryId === cat1.id);
+            const productsCat2 = cat2 ? products.filter((p: Product) => p.categoryId === cat2.id) : [];
+
+            setFeaturedProducts1([...productsCat1].sort(() => 0.5 - Math.random()).slice(0, 4));
+            setFeaturedProducts2([...productsCat2].sort(() => 0.5 - Math.random()).slice(0, 4));
+          }
         }
 
         if (Array.isArray(products)) {
-          setProducts(products);
+            setFeaturedSwiperProducts([...products].sort(() => 0.5 - Math.random()).slice(0, 8));
+
         }
 
       } catch (err) {
@@ -72,6 +95,8 @@ export default function Home() {
 
     fetchCategoriesAndProducts();
   }, [API]);
+
+
 
 
   useEffect(() => {
@@ -96,57 +121,21 @@ export default function Home() {
     else if (diff < -50) setCurrent((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  const horizontalProducts = [
-    {
-      id: "5",
-      name: "ESP32 Dev Board",
-      price: 14.99,
-      image: "/assets/products/esp32.jpg",
-      hoverImage: "/assets/products/esp32-hover.jpg",
-      inStock: true,
-    },
-    {
-      id: "6",
-      name: "OLED 0.96'' Display",
-      price: 4.5,
-      image: "/assets/products/oled.jpg",
-      hoverImage: "/assets/products/oled-hover.jpg",
-      inStock: true,
-    },
-    {
-      id: "7",
-      name: "DHT11 Temperature Sensor",
-      price: 2.99,
-      image: "/assets/products/dht11.jpg",
-      hoverImage: "/assets/products/dht11-hover.jpg",
-      inStock: true,
-    },
-    {
-      id: "8",
-      name: "Servo Motor SG90",
-      price: 1.99,
-      image: "/assets/products/sg90.jpg",
-      hoverImage: "/assets/products/sg90-hover.jpg",
-      inStock: true,
-    },
-  ];
 
   return (
     <main className="w-full pt-6">
       {/* 📂 Categories Section */}
-      <section className="px-4 mb-6">
-        <div className="flex gap-4 overflow-x-auto pb-2 justify-center items-center">
-          {homepageCategories.map((category) => (
-            <Link
-              key={category}
-              href={`/products?category=${encodeURIComponent(category)}`}
-              className="flex-shrink-0 px-4 py-2 bg-blue-100 text-blue-800 rounded-full hover:bg-yellow-300 transition whitespace-nowrap"
-            >
-              {category}
-            </Link>
-          ))}
-        </div>
-      </section>
+      <div className="flex gap-4 overflow-x-auto pb-2 justify-center items-center">
+        {homepageCategories.map((category) => (
+          <Link
+            key={category.id}
+            href={`/products?category=${encodeURIComponent(category.title)}`}
+            className="flex-shrink-0 px-4 py-2 bg-blue-100 text-blue-800 rounded-full hover:bg-yellow-300 transition whitespace-nowrap"
+          >
+            {category.title}
+          </Link>
+        ))}
+      </div>
 
       {/* 🌄 Carousel */}
       <div
@@ -204,67 +193,32 @@ export default function Home() {
 
       {/* 🏷️ Label */}
       <div className="my-10 px-4 justify-center text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Arduino Essentials</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">Products</h2>
       </div>
 
-      {/* 🧩 Featured Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-4 items-stretch">
-        <div className="lg:col-span-2 flex justify-center items-center">
-          <FeaturedCategoryCard />
-        </div>
-        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Populate the 4 random products from same category */}
-          {products.slice(0, 4).map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
-          ))}
+      {/* 🧩 First Featured Section */}
+      {featuredCategory1 && (
+        <section className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-4 items-stretch my-10">
+          <div className="lg:col-span-2 flex justify-center items-center">
+            <FeaturedCategoryCard category={featuredCategory1} />
+          </div>
+          <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {featuredProducts1.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+      )}
 
-          {/* Uncomment below to use static products for testing */}
-          {/* Uncomment below to use static products for testing */}
 
-          {/* <ProductCard
-            id="1"
-            name="Arduino Uno R3"
-            price={12.99}
-            image="/assets/products/Arduino-Uno-R3.jpg"
-            hoverImage="/assets/products/Arduino-Uno-R3-hover.jpg"
-            inStock={true}
-            description="Classic board for beginners and pros."
-          />
-          <ProductCard
-            id="2"
-            name="Nano V3.0"
-            price={9.5}
-            image="/assets/products/arduino-nano-v3.0.webp"
-            hoverImage="/assets/products/arduino-nano-v3.0-hover.webp"
-            inStock={true}
-          />
-          <ProductCard
-            id="3"
-            name="Breadboard Power Supply"
-            price={3.2}
-            image="/assets/products/Arduino-Uno-R3.jpg"
-            hoverImage="/assets/products/Arduino-Uno-R3-hover.jpg"
-            inStock={false}
-          />
-          <ProductCard
-            id="4"
-            name="Jumper Wires 40pcs"
-            price={1.5}
-            image="/assets/products/Male-Female_Wires.webp"
-            hoverImage="/assets/products/Male-Female-Wires-hover.webp"
-            inStock={true}
-          /> */}
-        </div>
-      </section>
+
+
 
 
       {/* 📦 See More */}
       <div className="text-center mt-6">
         <Link
-          href="/categories/arduino"
+          href={`/products?category=${featuredCategory1?.title}`}
           className="inline-block px-6 py-2 text-white bg-blue-600 hover:bg-yellow-400 hover:text-black transition rounded-lg shadow font-medium"
         >
           See More
@@ -289,49 +243,28 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 🧩 Featured Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-4 items-stretch">
-
-        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* <ProductCard
-            id="1"
-            name="Arduino Uno R3"
-            price={12.99}
-            image="/assets/products/Arduino-Uno-R3.jpg"
-            hoverImage="/assets/products/Arduino-Uno-R3-hover.jpg"
-            inStock={true}
-            description="Classic board for beginners and pros."
-          />
-          <ProductCard
-            id="2"
-            name="Nano V3.0"
-            price={9.5}
-            image="/assets/products/arduino-nano-v3.0.webp"
-            hoverImage="/assets/products/arduino-nano-v3.0-hover.webp"
-            inStock={true}
-          />
-          <ProductCard
-            id="3"
-            name="Breadboard Power Supply"
-            price={3.2}
-            image="/assets/products/Arduino-Uno-R3.jpg"
-            hoverImage="/assets/products/Arduino-Uno-R3-hover.jpg"
-            inStock={false}
-          />
-          <ProductCard
-            id="4"
-            name="Jumper Wires 40pcs"
-            price={1.5}
-            image="/assets/products/Male-Female_Wires.webp"
-            hoverImage="/assets/products/Male-Female-Wires-hover.webp"
-            inStock={true}
-          /> */}
-        </div>
-        <div className="lg:col-span-2 flex justify-center items-center">
-          <FeaturedCategoryCard />
-        </div>
-      </section>
-
+      {/* 🧩 Second Featured Section (Different Category) */}
+      {featuredCategory2 && (
+        <section className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-4 items-stretch my-10">
+          <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {featuredProducts2.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+          <div className="lg:col-span-2 flex justify-center items-center">
+            <FeaturedCategoryCard category={featuredCategory2} />
+          </div>
+        </section>
+      )}
+      {/* 📦 See More */}
+      <div className="text-center mt-6">
+        <Link
+          href={`/products?category=${featuredCategory2?.title}`}
+          className="inline-block px-6 py-2 text-white bg-blue-600 hover:bg-yellow-400 hover:text-black transition rounded-lg shadow font-medium"
+        >
+          See More
+        </Link>
+      </div>
       {/* 🎨 3D Modeling Showcase */}
       <ModelingShowcase />
 
@@ -344,7 +277,6 @@ export default function Home() {
       </div>
 
       {/* 🌀 Swiper Carousel */}
-
       <section className="px-4 py-6 bg-white">
         <Swiper
           modules={[Navigation, Pagination, A11y]}
@@ -353,33 +285,23 @@ export default function Home() {
           navigation
           pagination={{ clickable: true }}
           breakpoints={{
-            // when window width ≥ 640px
-            640: {
-              slidesPerView: 2,
-              spaceBetween: 20,
-            },
-            // when window width ≥ 768px
-            768: {
-              slidesPerView: 3,
-              spaceBetween: 24,
-            },
-            // when window width ≥ 1024px
-            1024: {
-              slidesPerView: 4,
-              spaceBetween: 30,
-            },
+            640: { slidesPerView: 2, spaceBetween: 20 },
+            768: { slidesPerView: 3, spaceBetween: 24 },
+            1024: { slidesPerView: 4, spaceBetween: 30 },
           }}
           className="mx-auto"
         >
-          {products.slice(0,8).map((product) => (
-            <SwiperSlide key={product.id}>
-              <div className="mx-auto ">
-                <ProductCard product={product} />
-              </div>
-            </SwiperSlide>
-          ))}
+          {featuredSwiperProducts.map((product) => (
+
+              <SwiperSlide key={product.id}>
+                <div className="mx-auto">
+                  <ProductCard product={product} />
+                </div>
+              </SwiperSlide>
+            ))}
         </Swiper>
       </section>
+
 
       {/* 🏆 Why Choose Us Section */}
       <section
