@@ -1,18 +1,37 @@
-//app/register/page.tsx
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import countries from "@/lib/countries.json";
+import { Listbox } from "@headlessui/react";
+import { Fragment, useState } from "react";
+import { registerUser } from "@/utils/register";
+
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [countryCode, setCountryCode] = useState("+961");
+  const [localNumber, setLocalNumber] = useState("");
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Registering:", name, email, password);
-    // Handle registration logic here
+
+    if (!name || !email || !password || !localNumber) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    const fullPhone = `${countryCode}${localNumber}`;
+    await registerUser(name, email, password, fullPhone);
+  };
+
+
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setLocalNumber(value);
+    }
   };
 
   return (
@@ -46,6 +65,48 @@ export default function RegisterPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Phone Number</label>
+          <div className="flex gap-2">
+            <div className="w-1/2">
+              {/* Custom Country Code Dropdown */}
+              <Listbox value={countryCode} onChange={setCountryCode}>
+                <div className="relative w-full">
+                  <Listbox.Button className="w-full px-4 py-2 text-left border border-gray-300 rounded bg-white">
+                    {countries.find(c => c.dialcode === countryCode)?.name} ({countryCode})
+                  </Listbox.Button>
+                  <Listbox.Options className="absolute z-10 mt-1 w-full max-h-60 overflow-auto bg-white border border-gray-300 rounded shadow-lg">
+                    {countries.map((country) => (
+                      <Listbox.Option key={country.code} value={country.dialcode} as={Fragment}>
+                        {({ active }) => (
+                          <li
+                            className={`px-4 py-2 cursor-pointer ${active ? 'bg-yellow-100' : ''
+                              }`}
+                          >
+                            <div className="font-semibold text-sm">{country.name}</div>
+                            <div className="text-xs text-gray-600">{country.dialcode}</div>
+                            <hr className="mt-2 mb-1 border-gray-200" />
+                          </li>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </div>
+              </Listbox>
+            </div>
+
+            <input
+              type="text"
+              placeholder="Phone Number"
+              className="w-1/2 px-4 py-2 border border-gray-300 rounded"
+              value={localNumber}
+              onChange={handleNumberChange}
+              required
+            />
+          </div>
+        </div>
+
 
         <button
           type="submit"

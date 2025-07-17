@@ -21,6 +21,7 @@ interface Product {
   hoverImage?: string;
   pdf?: string;
   description: string;
+  features?: string[];
   category: { title: string; id: number } | null;
 }
 
@@ -35,6 +36,8 @@ const ProductPage: React.FC = () => {
     price: '',
     inStock: '',
     categoryId: '',
+    features: '', // comma-separated input
+
   });
 
   // File states
@@ -63,6 +66,8 @@ const ProductPage: React.FC = () => {
     price: '',
     inStock: '',
     categoryId: '',
+    features: '', // comma-separated input
+
   });
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
   const [editHoverImageFile, setEditHoverImageFile] = useState<File | null>(null);
@@ -89,11 +94,13 @@ const ProductPage: React.FC = () => {
     { key: 'name', label: 'Name' },
     { key: 'image', label: 'Image' },
     { key: 'hoverImage', label: 'Hover Image' },
+    { key: 'features', label: 'Features' },
     { key: 'pdf', label: 'PDF' },
     { key: 'price', label: 'Price' },
     { key: 'inStock', label: 'Stock' },
     { key: 'category', label: 'Category' },
     { key: 'actions', label: 'Actions' },
+
   ];
 
   // Sorting handler
@@ -255,6 +262,7 @@ const ProductPage: React.FC = () => {
       formData.append('price', form.price);
       formData.append('inStock', form.inStock);
       formData.append('categoryId', form.categoryId);
+      formData.append('features', JSON.stringify(form.features.split(',').map(f => f.trim())));
 
       if (imageFile) formData.append('image', imageFile);
       if (hoverImageFile) formData.append('hoverImage', hoverImageFile);
@@ -272,7 +280,7 @@ const ProductPage: React.FC = () => {
       }
 
       // Reset form and show success
-      setForm({ name: '', description: '', price: '', inStock: '', categoryId: '' });
+      setForm({ name: '', description: '', price: '', inStock: '', categoryId: '', features: '' });
       setImageFile(null);
       setHoverImageFile(null);
       setPdfFile(null);
@@ -297,6 +305,8 @@ const ProductPage: React.FC = () => {
       price: product.price.toString(),
       inStock: product.inStock.toString(),
       categoryId: product.category?.id?.toString() || '',
+      features: product.features?.join(', ') || '',
+
     });
 
     // Set current image URLs as previews
@@ -332,6 +342,7 @@ const ProductPage: React.FC = () => {
       formData.append('price', editForm.price);
       formData.append('inStock', editForm.inStock);
       formData.append('categoryId', editForm.categoryId);
+      formData.append('features', JSON.stringify(editForm.features.split(',').map(f => f.trim())));
 
       if (editImageFile) formData.append('image', editImageFile);
       if (editHoverImageFile) formData.append('hoverImage', editHoverImageFile);
@@ -450,6 +461,16 @@ const ProductPage: React.FC = () => {
               className="w-full border p-2 rounded min-h-[100px]"
             />
           </div>
+          <div>
+            <label className="block mb-2 font-medium">Features (comma separated)</label>
+            <input
+              name="features"
+              value={form.features}
+              onChange={handleChange}
+              className="w-full border p-2 rounded"
+            />
+          </div>
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -616,6 +637,10 @@ const ProductPage: React.FC = () => {
                         )}
                       </td>
                       <td className="px-4 py-2">
+                        {product.features?.join(', ') || '-'}
+                      </td>
+
+                      <td className="px-4 py-2">
                         {product.pdf && (
                           <a
                             href={`${API}/uploads/products/${product.pdf}`}
@@ -755,6 +780,17 @@ const ProductPage: React.FC = () => {
                       className="w-full border p-2 rounded min-h-[100px]"
                     />
                   </div>
+
+                  <div>
+                    <label className="block mb-2 font-medium">Features (comma separated)</label>
+                    <input
+                      name="features"
+                      value={editForm.features}
+                      onChange={handleEditChange}
+                      className="w-full border p-2 rounded"
+                    />
+                  </div>
+
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>

@@ -1,39 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
-import React from "react";
-
-interface Props {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
-const mockProducts = [
-  {
-    id: "1",
-    name: "ESP32 Dev Board",
-    price: 15.99,
-    image: "/images/esp32-main.jpg",
-    inStock: true,
-    description: "Wi-Fi + Bluetooth development board perfect for IoT projects.",
-    features: ["Wi-Fi", "Bluetooth", "Low power consumption", "Compact design"],
-    pdf: "/pdfs/esp32-guide.pdf",
-  },
-  {
-    id: "2",
-    name: "Arduino Uno",
-    price: 12.99,
-    image: "/images/arduino-uno.jpg",
-    inStock: true,
-    description: "Classic Arduino Uno R3 board for beginners and prototyping.",
-    features: ["ATmega328P", "USB Interface", "Digital I/O Pins", "5V Operating Voltage"],
-    pdf: "/pdfs/arduino-guide.pdf",
-  },
-];
+import { useParams } from "next/navigation";
+import { Product } from "@/types/interfaces";
 
 const PdfIcon = () => (
   <svg
@@ -52,35 +24,80 @@ const PdfIcon = () => (
   </svg>
 );
 
-export default function ProductDetailPage(props: Props) {
-  const params = React.use(props.params);
-  const product = mockProducts.find((p) => p.id === params.id);
+export default function ProductDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [sliderRef] = useKeenSlider<HTMLDivElement>({ 
-    slides: { 
-      perView: 1.2, 
-      spacing: 16 
+  const [sliderRef] = useKeenSlider<HTMLDivElement>({
+    slides: {
+      perView: 1.2,
+      spacing: 16,
     },
     breakpoints: {
       "(min-width: 640px)": {
-        slides: { perView: 2.2, spacing: 24 }
+        slides: { perView: 2.2, spacing: 24 },
       },
       "(min-width: 1024px)": {
-        slides: { perView: 3.2, spacing: 32 }
-      }
-    }
+        slides: { perView: 3.2, spacing: 32 },
+      },
+    },
   });
 
-  if (!product) return <div className="p-6 text-red-600">Product not found</div>;
+  const API = process.env.NEXT_PUBLIC_API_URL ;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch main product
+        const productRes = await fetch(`${API}/product/${id}`);
+        if (!productRes.ok) throw new Error("Product not found");
+        const productData: Product = await productRes.json();
+        setProduct(productData);
+
+        // Fetch related products (same category)
+        const relatedRes = await fetch(
+          `${API}/product?category=${productData.category.title}&exclude=${id}`
+        );
+        const relatedData: Product[] = await relatedRes.json();
+        setRelatedProducts(relatedData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (id) fetchData();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+        <p>Loading product details...</p>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-8 text-red-600">
+        {error || "Product not found"}
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
       {/* Product Info */}
-       {/* Product Info */}
       <div className="flex flex-col md:flex-row gap-8">
         <div className="w-full md:w-1/2">
           <Image
-            src={product.image}
+            src={`${API}/uploads/products/${product.image}`}
             alt={product.name}
             width={500}
             height={500}
@@ -89,12 +106,17 @@ export default function ProductDetailPage(props: Props) {
         </div>
         <div className="w-full md:w-1/2 space-y-4">
           <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
-          <p className="text-xl text-blue-600 font-semibold">${product.price.toFixed(2)}</p>
-          <p className={`text-md ${product.inStock ? "text-green-600" : "text-red-500"}`}>
+          <p className="text-xl text-blue-600 font-semibold">
+            ${product.price.toFixed(2)}
+          </p>
+          <p
+            className={`text-md ${
+              product.inStock ? "text-green-600" : "text-red-500"
+            }`}
+          >
             {product.inStock ? "In Stock" : "Out of Stock"}
           </p>
-          
-          {/* Updated Quantity Controls */}
+
           <div className="flex items-center gap-4">
             <label className="text-gray-700">Quantity:</label>
             <div className="flex items-center border border-gray-300 rounded">
@@ -131,7 +153,7 @@ export default function ProductDetailPage(props: Props) {
           <p className="text-gray-700">{product.description}</p>
         </div>
 
-        {product.features && (
+        {product.features && product.features.length > 0 && (
           <div>
             <h2 className="text-2xl font-bold mb-2 text-gray-800">Features</h2>
             <ul className="list-disc list-inside text-gray-700 space-y-1">
@@ -143,9 +165,11 @@ export default function ProductDetailPage(props: Props) {
         )}
 
         <div>
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">Documentation</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">
+            Documentation
+          </h2>
           <a
-            href={product.pdf}
+            href={`${API}/uploads/products/${product.pdf}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
@@ -153,36 +177,43 @@ export default function ProductDetailPage(props: Props) {
             <PdfIcon />
             <div>
               <p className="text-lg font-medium text-gray-800">Product Guide</p>
-              <p className="text-sm text-gray-500">Click to view/download PDF</p>
+              <p className="text-sm text-gray-500">
+                Click to view/download PDF
+              </p>
             </div>
           </a>
         </div>
       </div>
 
       {/* Related Products */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-gray-800">Related Products</h2>
-        <div ref={sliderRef} className="keen-slider">
-          {mockProducts
-            .filter((p) => p.id !== product.id)
-            .map((related) => (
-              <div
+      {relatedProducts.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-gray-800">Related Products</h2>
+          <div ref={sliderRef} className="keen-slider">
+            {relatedProducts.map((related) => (
+              <a
                 key={related.id}
-                className="keen-slider__slide bg-white border rounded-lg p-4 shadow hover:shadow-md transition cursor-pointer"
+                href={`/products/${related.id}`}
+                className="keen-slider__slide block bg-white border rounded-lg p-4 shadow hover:shadow-md transition cursor-pointer"
               >
                 <Image
-                  src={related.image}
+                  src={`${API}/uploads/products/${related.image}`}
                   alt={related.name}
                   width={200}
                   height={200}
                   className="object-contain mx-auto"
                 />
-                <h3 className="text-lg font-semibold mt-2 text-center">{related.name}</h3>
-                <p className="text-blue-600 font-medium text-center">${related.price.toFixed(2)}</p>
-              </div>
+                <h3 className="text-lg font-semibold mt-2 text-center">
+                  {related.name}
+                </h3>
+                <p className="text-blue-600 font-medium text-center">
+                  ${related.price.toFixed(2)}
+                </p>
+              </a>
             ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

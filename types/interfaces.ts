@@ -17,6 +17,14 @@ export interface Product {
   pdf: string;
   inStock: number;
   createdAt: string;
+  features: string[];
   categoryId: number;
   category: Category;
+}
+
+
+export interface Country {
+  code: string;
+  name: string;
+  dialcode: string;
 }
