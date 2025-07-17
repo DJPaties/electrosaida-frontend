@@ -7,8 +7,10 @@ import { Search, User } from "lucide-react";
 import CartModal from "./CartModal";
 import { useCart } from "./CartContext";
 import { usePathname } from "next/navigation";
+import { isAuthenticated } from "@/utils/checkAuth";
 
 export default function Navbar() {
+  const [isAuth, setIsAuth] = useState(false);
   const [visible, setVisible] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [dropdownFixed, setDropdownFixed] = useState(false);
@@ -19,8 +21,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const { items } = useCart();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-
-  const isLoggedIn = true; // Replace later with real auth
 
   const toggleCart = () => setIsCartOpen((prev) => !prev);
 
@@ -60,6 +60,16 @@ export default function Navbar() {
     setShowUserDropdown(false);
     setDropdownFixed(false);
   }, [pathname]);
+
+  useEffect(()=>{
+    const navbarProfileStatus = async() =>{
+      const isAuth = await isAuthenticated();
+      setIsAuth(isAuth)
+      console.log("Authentication:",isAuth)
+
+    }
+    navbarProfileStatus()
+  },[])
 
   return (
     <>
@@ -130,7 +140,7 @@ export default function Navbar() {
                 ref={dropdownRef}
                 className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 shadow-md rounded-md py-2 z-50"
               >
-                {!isLoggedIn ? (
+                {!isAuth ? (
                   <Link
                     href="/login"
                     className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"

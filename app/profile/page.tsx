@@ -1,18 +1,57 @@
 "use client";
 
-import { useAuth } from "@/components/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { isAuthenticated } from "@/utils/checkAuth";
+import { logoutUser } from "@/utils/logout";
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const [isAuth, setIsAuth] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) router.push("/login");
-  }, [user]);
+    const loadProfile = async () => {
+      const token = localStorage.getItem("access_token");
+      const auth = await isAuthenticated();
+
+      
+      if (!auth || !token) {
+        router.push("/login");
+        return;
+      }
+      setIsAuth(true);
+      
+      // Get user data from /auth/me
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+        } else {
+          router.push("/login");
+        }
+      } catch (err) {
+        console.error("Error loading profile:", err);
+        router.push("/login");
+      }
+    };
+
+    loadProfile();
+  }, [router]);
+
+  const logout = async () => {
+    await logoutUser();
+  };
 
   if (!user) return null;
 
@@ -32,10 +71,7 @@ export default function ProfilePage() {
           <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
           <p className="text-sm text-gray-500">{user.email}</p>
           <button
-            onClick={() => {
-              logout();
-              router.push("/");
-            }}
+            onClick={logout}
             className="mt-2 text-sm text-red-500 hover:underline"
           >
             Logout
@@ -46,7 +82,7 @@ export default function ProfilePage() {
       <div className="mt-8">
         <h3 className="text-lg font-semibold mb-4 text-blue-800">My Info</h3>
         <div className="space-y-2 text-gray-700 text-sm">
-          <p><strong>User ID:</strong> {user.id}</p>
+          <p><strong>User ID:</strong> {user.sub}</p>
           <p><strong>Joined:</strong> January 2024</p>
           <p><strong>Location:</strong> Saida, Lebanon</p>
         </div>

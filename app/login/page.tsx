@@ -6,16 +6,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
-
+import { loginUser } from "@/utils/login";
 export default function LoginPage() {
-    const { login } = useAuth();
+    // const { login } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = login(email, password);
+    const success = await loginUser(email, password);
     if (success) {
       toast.success("Logged in!");
       router.push("/"); // redirect
@@ -54,7 +54,7 @@ export default function LoginPage() {
           Login
         </button>
 
-        <div className="mt-4 text-center">
+        {/* <div className="mt-4 text-center">
           <p className="text-sm">or</p>
           <button
             type="button"
@@ -62,7 +62,7 @@ export default function LoginPage() {
           >
             Login with Google
           </button>
-        </div>
+        </div> */}
 
         <p className="mt-4 text-sm text-center">
           Don&apos;t have an account?{' '}
